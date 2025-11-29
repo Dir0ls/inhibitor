@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Диагностика — Таблица Шульте</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <header class="main-header">
+    <nav class="nav-container">
+      <a href="index.html" class="nav-item">Главная</a>
+      <a href="diagnostics.html" class="nav-item active">Диагностика</a>
+      <a href="test.html" class="nav-item">Тестирование</a>
+      <a href="diagnostics-repeat.html" class="nav-item">Повторная диагностика</a>
+      <a href="results.html" class="nav-item">Результаты</a>
+    </nav>
+    <div class="user-box" id="userName"></div>
+  </header>
+
+  <main class="page">
+    <section class="info-panel">
+      <p class="eyebrow">Инструкция</p>
+      <h1>Таблица Шульте</h1>
+      <p>Это квадрат 5×5, в котором в случайном порядке расположены числа от 1 до 25.
+        Ваша задача — последовательно указать их как можно быстрее и сохранить концентрацию.</p>
+
+      <h2>Цель упражнения</h2>
+      <p>Найти и последовательно указать все числа от 1 до 25 как можно быстрее, с максимальной концентрацией.</p>
+
+      <h2>Что развивает?</h2>
+      <ul>
+        <li>скорость восприятия информации;</li>
+        <li>периферическое зрение;</li>
+      
+       
+        <li>концентрацию внимания;</li>
+        <li>работоспособность мозга;</li>
+        <li>навыки скорочтения.</li>
+      </ul>
+    </section>
+
+    <section class="exercise-shell" id="exercise">
+      <div class="board-surface">
+        <div id="shulteGrid" class="shulte-grid" aria-label="Таблица Шульте"
+          data-placeholder="Нажмите «Старт», чтобы построить таблицу"></div>
+      </div>
+      <div class="sidebar-panel" aria-live="polite">
+        <div class="clock-icon"></div>
+        <div class="timer-display" id="timerPrimary">00.00.00</div>
+        <p class="muted">Первичное прохождение. Найдите числа от 1 до 25 в правильном порядке.</p>
+        <div class="controls">
+          <button class="btn btn-primary" onclick="startShulte(false)">Старт</button>
+          <button class="btn btn-ghost" onclick="resetShulte()">Сброс</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="exercise-shell exercise-shell--advanced" id="exercise-second" style="display:none;">
+      <div class="board-surface board-surface--split">
+        <div class="shulte-video-box shulte-video-box--media">
+          <video id="shulteVideo" autoplay muted loop playsinline controls>
+            <source src="assets/video/1v.mp4" type="video/mp4">
+            Ваш браузер не поддерживает видео.
+          </video>
+        </div>
+        <div class="shulte-grid-panel">
+          <div id="shulteGridSecond" class="shulte-grid" aria-label="Таблица Шульте вторая"
+            data-placeholder="Нажмите «Старт», чтобы построить таблицу"></div>
+        </div>
+      </div>
+      <div class="sidebar-panel" aria-live="polite">
+        <div class="clock-icon"></div>
+        <div class="timer-display" id="timerSecond">00.00.00</div>
+        <p class="muted">Вторая таблица с видеотренировкой. Найдите числа от 1 до 25.</p>
+        <div class="controls">
+          <button class="btn btn-primary" onclick="startSecondTable()">Старт</button>
+          <button class="btn btn-ghost" onclick="resetShulte()">Сброс</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="assets/js/main.js"></script>
+  <script src="assets/js/shulte.js"></script>
+</body>
+</html>

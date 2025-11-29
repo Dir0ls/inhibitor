@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Результаты</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <header class="main-header">
+    <nav class="nav-container">
+      <a href="index.html" class="nav-item">Главная</a>
+      <a href="diagnostics.html" class="nav-item">Диагностика</a>
+      <a href="test.html" class="nav-item">Тестирование</a>
+      <a href="diagnostics-repeat.html" class="nav-item">Повторная диагностика</a>
+      <a href="results.html" class="nav-item active">Результаты</a>
+    </nav>
+
+    <div class="user-box" id="userName"></div>
+  </header>
+
+  <main class="page">
+    <section class="info-panel">
+      <p class="eyebrow">Динамика прогресса</p>
+      <h1>Результаты прохождений</h1>
+      <p class="muted">Сравните время выполнения первичного и контрольного подхода к таблице Шульте,
+        чтобы увидеть, как тренировка влияет на внимание и скорость.</p>
+      <div class="chart">
+        <div class="bar-col">
+          <div class="bar" id="barBefore"><span class="barValue" id="beforeValue">—</span></div>
+          <p class="barLabel">до тренировки</p>
+        </div>
+        <div class="bar-col">
+          <div class="bar" id="barAfter"><span class="barValue" id="afterValue">—</span></div>
+          <p class="barLabel">после тренировки</p>
+        </div>
+        <div class="bar-col">
+          <div class="bar" id="barDelta"><span class="barValue" id="deltaValue">—</span></div>
+          <p class="barLabel">изменение</p>
+        </div>
+      </div>
+      <div class="results-table-wrapper">
+        <table class="results-table">
+          <thead>
+            <tr>
+              <th>Показатель</th>
+              <th>Диагностика (среднее из 2 таблиц)</th>
+              <th>Повторная диагностика (среднее из 2 таблиц)</th>
+              <th>Δ (улучшение)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Среднее время</td>
+              <td id="diagSumCell">—</td>
+              <td id="repeatSumCell">—</td>
+              <td id="deltaCell">—</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="controls"><button class="btn btn-ghost" onclick="clearResults()">Очистить результаты</button></div>
+    </section>
+  </main>
+
+  <script src="assets/js/main.js"></script>
+  <script>
+    // отрисовать значения и высоты столбиков
+    function getStoredNumber(key) {
+      const raw = localStorage.getItem(key);
+      if (raw === null) return null;
+      const num = parseFloat(raw);
+      return Number.isNaN(num) ? null : num;
+    }
+
+    function formatSeconds(value) {
+      return value !== null ? `${value.toFixed(1)} с` : '—';
+    }
+
+    function formatDelta(delta) {
+      if (delta === null) return '—';
+      const rounded = delta.toFixed(1);
+      const prefix = delta > 0 ? '+' : '';
+      let trend = 'без изменений';
+      if (delta > 0) trend = 'улучшение';
+      else if (delta < 0) trend = 'ухудшение';
+      return `${prefix}${rounded} с (${trend})`;
+    }
+
+    function setBarHeight(id, value, maxReference) {
+      const bar = document.getElementById(id);
+      if (!bar) return;
+      if (value === null || !maxReference) {
+        bar.style.height = '30px';
+        return;
+      }
+      const height = Math.max(30, (maxReference - value) / maxReference * 220);
+      bar.style.height = `${height}px`;
+    }
+
+    function setDeltaBar(delta, maxReference) {
+      const bar = document.getElementById('barDelta');
+      if (!bar) return;
+      bar.classList.remove('bar-positive', 'bar-negative');
+      if (delta === null) {
+        bar.style.height = '30px';
+        return;
+      }
+      const absVal = Math.abs(delta);
+      const base = Math.max(maxReference || absVal || 1, absVal || 1);
+      const height = Math.max(30, Math.min(220, (absVal / base) * 220));
+      bar.style.height = `${height}px`;
+      if (delta > 0) bar.classList.add('bar-positive');
+      else if (delta < 0) bar.classList.add('bar-negative');
+    }
+
+    function computeMeanFromParts(prefix, legacyKeys = []) {
+      const stored = getStoredNumber(`${prefix}_mean_seconds`);
+      if (stored !== null) return stored;
+
+      const first = getStoredNumber(`${prefix}_first_last`);
+      const second = getStoredNumber(`${prefix}_second_last`);
+
+      if (first !== null && second !== null) {
+        return parseFloat(((first + second) / 2).toFixed(1));
+      }
+
+      if (legacyKeys.length === 2) {
+        const legacyFirst = getStoredNumber(legacyKeys[0]);
+        const legacySecond = getStoredNumber(legacyKeys[1]);
+        if (legacyFirst !== null && legacySecond !== null) {
+          return parseFloat(((legacyFirst + legacySecond) / 2).toFixed(1));
+        }
+      }
+      return null;
+    }
+
+    function renderResults() {
+      const diagAvg = computeMeanFromParts('diagnostics', ['first', 'second']);
+      const repeatAvg = computeMeanFromParts('repeat', []);
+      const delta = (diagAvg !== null && repeatAvg !== null)
+        ? parseFloat((diagAvg - repeatAvg).toFixed(1))
+        : null;
+
+      document.getElementById('beforeValue').innerText = formatSeconds(diagAvg);
+      document.getElementById('afterValue').innerText = formatSeconds(repeatAvg);
+      document.getElementById('deltaValue').innerText = delta !== null ? `${delta > 0 ? '+' : ''}${delta.toFixed(1)} с` : '—';
+
+      document.getElementById('diagSumCell').innerText = formatSeconds(diagAvg);
+      document.getElementById('repeatSumCell').innerText = formatSeconds(repeatAvg);
+      document.getElementById('deltaCell').innerText = formatDelta(delta);
+
+      const scaleValues = [];
+      if (diagAvg !== null) scaleValues.push(diagAvg);
+      if (repeatAvg !== null) scaleValues.push(repeatAvg);
+      const max = scaleValues.length ? Math.max(...scaleValues, 10) : 10;
+
+      setBarHeight('barBefore', diagAvg, max);
+      setBarHeight('barAfter', repeatAvg, max);
+      setDeltaBar(delta, max);
+    }
+    window.addEventListener('load', renderResults);
+  </script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Повторная диагностика</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <header class="main-header">
+    <nav class="nav-container">
+      <a href="index.html" class="nav-item">Главная</a>
+      <a href="diagnostics.html" class="nav-item">Диагностика</a>
+      <a href="test.html" class="nav-item">Тестирование</a>
+      <a href="diagnostics-repeat.html" class="nav-item active">Повторная диагностика</a>
+      <a href="results.html" class="nav-item">Результаты</a>
+    </nav>
+    <div class="user-box" id="userName"></div>
+  </header>
+
+  <main class="page">
+    <section class="info-panel">
+      <p class="eyebrow">Контрольное прохождение</p>
+      <h1>Повторная таблица Шульте</h1>
+      <p>Выполните повтор после тренировки, чтобы сравнить концентрацию и скорость с первичной
+        диагностикой. Оба подхода автоматически сохраняются и попадут во вторую колонку раздела
+        «Результаты».</p>
+
+      <h2>Как пройти контроль</h2>
+      <ul>
+        <li>Нажмите «Старт» и последовательно найдите числа от 1 до 25;</li>
+        <li>Старайтесь удерживать взгляд в центре и подключать периферическое зрение;</li>
+        <li>После завершения первой таблицы автоматически откроется вторая с видео-усложнением;</li>
+        <li>Сравните среднее время в разделе «Результаты» и отслеживайте прогресс.</li>
+      </ul>
+    </section>
+
+    <section class="exercise-shell" id="repeat-exercise">
+      <div class="board-surface">
+        <div id="shulteGridRepeat" class="shulte-grid" aria-label="Повторная таблица Шульте"
+          data-placeholder="Нажмите «Старт», чтобы начать контрольное прохождение"></div>
+      </div>
+      <div class="sidebar-panel" aria-live="polite">
+        <div class="clock-icon"></div>
+        <div class="timer-display" id="timerRepeat">00.00.00</div>
+        <p class="muted">Первый контрольный подход. Работайте спокойно, фиксируя взгляд и поддерживая темп.</p>
+        <div class="controls">
+          <button class="btn btn-primary" onclick="startShulte(true)">Старт</button>
+          <button class="btn btn-ghost" onclick="resetShulte()">Сброс</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="exercise-shell exercise-shell--advanced" id="repeat-exercise-second" style="display:none;">
+      <div class="board-surface board-surface--split">
+        <div class="shulte-video-box shulte-video-box--media">
+          <video autoplay muted loop playsinline controls>
+            <source src="assets/video/1v.mp4" type="video/mp4">
+            Ваш браузер не поддерживает видео.
+          </video>
+        </div>
+        <div class="shulte-grid-panel">
+          <div id="shulteGridRepeatSecond" class="shulte-grid" aria-label="Вторая таблица повторной диагностики"
+            data-placeholder="Нажмите «Старт», чтобы продолжить контрольное прохождение"></div>
+        </div>
+      </div>
+      <div class="sidebar-panel" aria-live="polite">
+        <div class="clock-icon"></div>
+        <div class="timer-display" id="timerRepeatSecond">00.00.00</div>
+        <p class="muted">Финальный подход с видеостимулом. Сохраняйте внимание, контролируйте дыхание.</p>
+        <div class="controls">
+          <button class="btn btn-primary" onclick="startRepeatSecondTable()">Старт</button>
+          <button class="btn btn-ghost" onclick="resetShulte()">Сброс</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="assets/js/main.js"></script>
+  <script src="assets/js/shulte.js"></script>
+</body>
+</html>
