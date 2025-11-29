@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg width="1898" height="966" viewBox="0 0 1898 966" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter color-interpolation-filters="sRGB" x="-369" y="-568" width="371" height="570" id="filter_1">
+      <feFlood flood-opacity="0" result="BackgroundImageFix_1" />
+      <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0" in="SourceAlpha" />
+      <feOffset dx="0" dy="4" />
+      <feGaussianBlur stdDeviation="2" />
+      <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.251 0" />
+      <feBlend mode="normal" in2="BackgroundImageFix_1" result="Shadow_2" />
+      <feBlend mode="normal" in="SourceGraphic" in2="Shadow_2" result="Shape_3" />
+    </filter>
+  </defs>
+  <g>
+    <path d="M0 575.267C0 499.603 85.5094 324.695 79.2775 179.176C73.0456 33.6565 -4.17291 1.17578 98.6429 1.17578C201.458 1.17578 191.728 -1.46985 199.196 1.17596C251.882 19.8424 114.339 93.0763 129.083 179.176C138.838 236.145 218.562 242.513 218.562 318.176C218.562 393.839 312.284 457.876 270.784 524.766C229.284 591.655 266.892 603.375 199.196 616C131.5 628.625 0 650.929 0 575.267Z" fill="#9466FF" fill-rule="evenodd" fill-opacity="0.2" transform="matrix(0 1 -1 0 900 800)" />
+    <!-- остальные path как в исходном SVG -->
+  </g>
+</svg>

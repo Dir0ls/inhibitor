@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Побег из подземелья</title>
+<style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+    @import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;700&display=swap');
+    body {
+        background: #f6f0ff;
+        font-family: 'Exo 2', sans-serif;
+        color: #1b1130;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 20px;
+        margin: 0;
+        position: relative;
+    }
+    body::before,
+    body::after{
+        content:'';
+        position:fixed;
+        width:520px;
+        height:520px;
+        border-radius:45% 55% 55% 45%;
+        background:rgba(142,111,255,.18);
+        z-index:-2;
+        filter:blur(0);
+    }
+    body::before{top:-120px;left:-160px;}
+    body::after{bottom:-180px;right:-160px;}
+    #game-container {
+        position: relative;
+        width: 600px;
+        height: 800px;
+        box-shadow: 0 25px 80px rgba(96,33,201,.15);
+        border-radius: 32px;
+        overflow: hidden;
+        background: #ffffff;
+        border: none;
+    }
+    canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(ellipse at top, #7e45ff, #5730c3);
+    }
+    #ui-overlay {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+    }
+    .panel {
+        position: absolute;
+        left: 0;
+        right: 0;
+        text-align: center;
+        pointer-events: auto;
+    }
+    #hud-panel {
+        pointer-events: auto;
+        top: 8px;
+        left: 8px;
+        right: 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 14px;
+        text-shadow: 0 0 6px rgba(0,0,0,0.8);
+    }
+    #status-panel {
+        pointer-events: none;
+        position: absolute;
+        top: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        text-align: center;
+        text-shadow: 0 0 6px rgba(0,0,0,0.9);
+        font-size: 14px;
+    }
+    #win-panel {
+        pointer-events: auto;
+    }
+    h1 {
+        font-size: 28px;
+        letter-spacing: 2px;
+        color: #6b35f2;
+        text-shadow: none;
+        margin-bottom: 10px;
+        font-weight: 700;
+    }
+    h2 {
+        font-size: 16px;
+        color: #6f6892;
+        margin-bottom: 20px;
+        font-weight: 600;
+    }
+    p {
+        font-size: 14px;
+        color: #6f6892;
+        margin-bottom: 10px;
+    }
+    .btn {
+        display: inline-block;
+        margin: 5px 8px;
+        padding: 14px 32px;
+        border-radius: 999px;
+        border: none;
+        background: linear-gradient(120deg, #6630ff, #a353ff);
+        color: #fff;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        box-shadow: 0 18px 35px rgba(111,55,230,.35);
+        transition: transform 0.25s, box-shadow 0.25s;
+        text-decoration: none;
+    }
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 20px 40px rgba(111,55,230,.45);
+    }
+    .btn-level {
+        min-width: 110px;
+    }
+    .btn-green { background: linear-gradient(135deg, #2e7d32, #66bb6a); }
+    .btn-yellow { background: linear-gradient(135deg, #f9a825, #ffeb3b); color:#212121; }
+    .btn-red { background: linear-gradient(135deg, #c62828, #ef5350); }
+    .btn-small {
+        padding: 6px 14px;
+        font-size: 12px;
+        border-radius: 8px;
+        border-width: 1px;
+    }
+    #level-indicator span {
+        font-weight: 600;
+    }
+    #win-panel {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        padding: 30px 40px;
+        border-radius: 24px;
+        background: #ffffff;
+        box-shadow: 0 25px 80px rgba(96,33,201,.15);
+        text-align: center;
+        pointer-events: auto;
+        display: none;
+    }
+    #win-panel h2 {
+        margin-bottom: 8px;
+        color: #6b35f2;
+        text-shadow: none;
+        font-weight: 700;
+    }
+    #win-panel p {
+        margin-bottom: 4px;
+        color: #6f6892;
+    }
+    .exit-button {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(120deg, #6630ff, #a353ff);
+        color: #fff;
+        border: none;
+        border-radius: 999px;
+        padding: 10px 26px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 18px 35px rgba(111,55,230,.35);
+        transition: transform 0.25s, box-shadow 0.25s;
+        z-index: 1000;
+    }
+    .exit-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 22px 40px rgba(111,55,230,.45);
+    }
+    #difficulty-panel {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(255, 255, 255, 0.95);
+        padding: 18px 24px;
+        border-radius: 24px;
+        box-shadow: 0 25px 80px rgba(96,33,201,.15);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        align-items: center;
+        pointer-events: auto;
+        width: calc(100% - 80px);
+        max-width: 520px;
+    }
+    #difficulty-panel p {
+        margin: 0;
+        font-weight: 600;
+        color: #6f6892;
+    }
+    .level-buttons {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .level-buttons .btn-level {
+        min-width: 120px;
+    }
+</style>
+</head>
+<body>
+<button class="exit-button" onclick="exitGame()">Выход</button>
+<div id="game-container">
+    <canvas id="game" width="600" height="800"></canvas>
+    <div id="ui-overlay">
+        <div id="hud-panel" style="display:none;">
+            <div id="stats-left">
+                <span id="time-label">Время: 0.0с</span><br>
+                <span id="moves-label"></span>
+            </div>
+            <div id="level-indicator">
+                Уровень: <span id="level-name"></span>
+            </div>
+        </div>
+
+        <div id="status-panel" style="display:none;">
+            <div id="status-text">Нормально</div>
+            <div id="status-time"></div>
+        </div>
+
+        <div id="win-panel">
+            <h2>МОЛОДЕЦ, У ТЕБЯ ВЫСОКИЙ УРОВЕНЬ ИНГИБИТОРНОГО КОНТРОЛЯ!</h2>
+            <p id="win-time"></p>
+            <p id="win-moves"></p>
+            <div style="margin-top:15px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+                <button id="restart-btn" class="btn btn-primary">Рестарт</button>
+                <button id="change-level-btn" class="btn btn-small">Выбор уровня</button>
+            </div>
+        </div>
+
+        <div id="difficulty-panel">
+            <p>Выберите уровень сложности</p>
+            <div class="level-buttons">
+                <button class="btn btn-level btn-green" data-level="Лёгкий">Лёгкий</button>
+                <button class="btn btn-level btn-yellow" data-level="Средний">Средний</button>
+                <button class="btn btn-level btn-red" data-level="Сложный">Сложный</button>
+            </div>
+            <small style="color:#6f6892;">Стрелки ← ↑ → ↓ — движение. Инверсия меняет направление!</small>
+        </div>
+    </div>
+</div>
+
+<script>
+/* ====== ДАННЫЕ УРОВНЕЙ (из твоего Python) ====== */
+const LEVELS = {
+    "Лёгкий": {
+        speed: 2,
+        inversionDuration: [1, 2],
+        maze: [
+            "111111111111111111",
+            "1S  1     1    1 1",
+            "1   1 111   1   11",
+            "1 1   1     1 1111",
+            "1 111 1 111 1 1  1",
+            "1     1 1   1 1 11",
+            "11111 1 1 1 1 1  1",
+            "1     1   1   1111",
+            "1 111111 1111 1  1",
+            "1 1           1 11",
+            "1 1 111 11111 1  1",
+            "1   1   1     1 11",
+            "111 1 1 1 11111 11",
+            "1     1 1       11",
+            "1 11111 1111 11111",
+            "1 1         1    1",
+            "1 1 1111111 1 1111",
+            "1   1       1    1",
+            "111 1 111111111 11",
+            "1E               1",
+            "111111111111111111"
+        ]
+    },
+    "Средний": {
+        speed: 2,
+        inversionDuration: [2, 4],
+        maze: [
+            "111111111111111111111111",
+            "1S 1         1       111",
+            "1  1 111 1 1 1 1111 1 11",
+            "1 1   1  1 1   1  1 1 11",
+            "1 11  1  11 1111 1 1 111",
+            "1    1 1          1  111",
+            "1111 1 11111 111 1 11111",
+            "1    1          1 1   11",
+            "1 111111111 1 111 1 1111",
+            "1         1 1    1 1  11",
+            "1 1 11111 1 111111 1 111",
+            "1 1 1     1       1 1 11",
+            "1 1 1 1111111111   1 111",
+            "1 1 1 1           1  111",
+            "1 1 1 1 111111111 111111",
+            "1 1 1 1 1         1   11",
+            "1 1 1 1 1 111111111 1111",
+            "1 1 1 1 1 1       1   11",
+            "1 1 1 1 1 1 1111 1 11111",
+            "1 1 1 1 1 1    1 1    11",
+            "1 1 1 1 1 1111 1 1 11111",
+            "1 1 1 1 1      1 1   111",
+            "1 1 1 1 111111 1 111 111",
+            "1 1 1 1        1     111",
+            "1 1 1 11111111 1 1111111",
+            "1 1 1          1     111",
+            "1 1 11111111111111 11111",
+            "1 1              1   111",
+            "1 111111111111111111  E1",
+            "1                   1 11",
+            "111111111111111111111111"
+        ]
+    },
+    "Сложный": {
+        speed: 3,
+        inversionDuration: [4, 6],
+        maze: [
+            "11111111111111111111111111111",
+            "1S 1     1   1       1      1",
+            "1  1 111 1 1 1 1111 1 111 1 1",
+            "1 1   1  1 1   1  1 1 1   1 1",
+            "1 111 1 111 1111 1 1 1 1111 1",
+            "1    1          1 1 1      11",
+            "1111 1 111111 11     111111 1",
+            "1    1      1   1 1 1   1   1",
+            "1 111111111 1 11111 1 1 11111",
+            "1 1       1 1       1 1 1  11",
+            "1 1 11111 1 1111111 1 1 1 1 1",
+            "1 1 1     1       1    1 1 11",
+            "1 1 1 1111111111   111 1 1 11",
+            "1 1 1 1           1  1 1 1 11",
+            "1 1 1 1 111111111 1 1     1 1",
+            "1 1 1 1 1         1 1     1 1",
+            "1 1 1 1 1 111111111 11111 1 1",
+            "1 1 1 1 1 1       1       1 1",
+            "1 1 1 1 1 1 1111 1 111111 1 1",
+            "1 1 1 1 1 1    1 1 1        1",
+            "1 1 1 1 1 1111 1 1 1 111111 1",
+            "1 1 1 1 1      1 1 1       11",
+            "1 1 1 1 111111 1 1 1111111 11",
+            "1 1 1 1        1 111        1",
+            "1 1 1 11111111 1 11111 111 11",
+            "1 1 1          1      1  1 11",
+            "1 1 1111111111111111 1 1 1  1",
+            "1 1                   1    E1",
+            "1 1111111111111111111 1111111",
+            "1                           1",
+            "111111111111111111111111111111"
+        ]
+    }
+};
+
+/* ====== ВСПОМОГАТЕЛЬНЫЕ ПЕРЕМЕННЫЕ ====== */
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+const hudPanel = document.getElementById("hud-panel");
+const statusPanel = document.getElementById("status-panel");
+const winPanel = document.getElementById("win-panel");
+
+const timeLabel = document.getElementById("time-label");
+const movesLabel = document.getElementById("moves-label");
+const levelNameLabel = document.getElementById("level-name");
+const statusText = document.getElementById("status-text");
+const statusTime = document.getElementById("status-time");
+const winTimeLabel = document.getElementById("win-time");
+const winMovesLabel = document.getElementById("win-moves");
+
+const levelButtons = document.querySelectorAll("[data-level]");
+const difficultyPanel = document.getElementById("difficulty-panel");
+
+let currentLevelName = null;
+let currentLevel = null;
+
+let cellSize = 24;
+let ballX = 0;
+let ballY = 0;
+let ballRadius = 8;
+
+let inverted = false;
+let inversionStart = 0;
+let inversionDuration = 0;
+const inversionInterval = 4000; // 4 сек
+let lastInversionTime = 0;
+
+let movesCount = 0;
+let startTime = 0;
+let elapsedTime = 0;
+let gameWon = false;
+
+let keys = {ArrowLeft:false, ArrowRight:false, ArrowUp:false, ArrowDown:false};
+
+/* ====== УТИЛИТЫ ====== */
+function randInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+/* ====== ИНИЦИАЛИЗАЦИЯ УРОВНЯ ====== */
+function startLevel(levelName) {
+    currentLevelName = levelName;
+    currentLevel = LEVELS[levelName];
+
+    const maze = currentLevel.maze;
+    const rows = maze.length;
+    const cols = maze[0].length;
+    cellSize = Math.min(canvas.width / cols, canvas.height / rows);
+
+    for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+            if (maze[y][x] === "S") {
+                ballX = x * cellSize + cellSize / 2;
+                ballY = y * cellSize + cellSize / 2;
+            }
+        }
+    }
+
+    inverted = false;
+    inversionStart = 0;
+    inversionDuration = 0;
+    lastInversionTime = performance.now();
+
+    movesCount = 0;
+    startTime = performance.now();
+    elapsedTime = 0;
+    gameWon = false;
+
+    difficultyPanel.style.display = "none";
+    hudPanel.style.display = "flex";
+    statusPanel.style.display = "block";
+    winPanel.style.display = "none";
+    levelNameLabel.textContent = levelName;
+}
+
+function showDifficultyPanel() {
+    currentLevel = null;
+    currentLevelName = null;
+    hudPanel.style.display = "none";
+    statusPanel.style.display = "none";
+    winPanel.style.display = "none";
+    difficultyPanel.style.display = "flex";
+    gameWon = false;
+}
+
+/* ====== ЛОГИКА ====== */
+function update(dt) {
+    if (!currentLevel || gameWon) return;
+
+    const speed = currentLevel.speed;
+
+    let dx = 0, dy = 0;
+    if (keys.ArrowLeft) dx -= speed;
+    if (keys.ArrowRight) dx += speed;
+    if (keys.ArrowUp) dy -= speed;
+    if (keys.ArrowDown) dy += speed;
+
+    if (inverted) {
+        dx = -dx;
+        dy = -dy;
+    }
+
+    if (dx !== 0 || dy !== 0) {
+        moveBall(dx, dy);
+        movesCount++;
+    }
+
+    const now = performance.now();
+    elapsedTime = (now - startTime) / 1000;
+
+    if (!inverted && now - lastInversionTime >= inversionInterval) {
+        const [minD, maxD] = currentLevel.inversionDuration;
+        inversionDuration = randInt(minD * 1000, maxD * 1000);
+        inverted = true;
+        inversionStart = now;
+        lastInversionTime = now;
+    }
+
+    if (inverted && now - inversionStart > inversionDuration) {
+        inverted = false;
+    }
+
+    if (checkWin()) {
+        gameWon = true;
+        winTimeLabel.textContent = `Время: ${elapsedTime.toFixed(1)}с`;
+        winMovesLabel.textContent = `Ходы: ${movesCount}`;
+        winPanel.style.display = "block";
+    }
+}
+
+function moveBall(dx, dy) {
+    const maze = currentLevel.maze;
+
+    function collides(nx, ny) {
+        const points = [
+            [nx - ballRadius, ny],
+            [nx + ballRadius, ny],
+            [nx, ny - ballRadius],
+            [nx, ny + ballRadius],
+            [nx - ballRadius, ny - ballRadius],
+            [nx + ballRadius, ny - ballRadius],
+            [nx - ballRadius, ny + ballRadius],
+            [nx + ballRadius, ny + ballRadius]
+        ];
+        for (const [px, py] of points) {
+            const cx = Math.floor(px / cellSize);
+            const cy = Math.floor(py / cellSize);
+            if (cy >= 0 && cy < maze.length && cx >= 0 && cx < maze[0].length) {
+                if (maze[cy][cx] === "1") return true;
+            }
+        }
+        return false;
+    }
+
+    if (dx !== 0) {
+        const nx = ballX + dx;
+        if (!collides(nx, ballY)) ballX = nx;
+    }
+    if (dy !== 0) {
+        const ny = ballY + dy;
+        if (!collides(ballX, ny)) ballY = ny;
+    }
+}
+
+function checkWin() {
+    const maze = currentLevel.maze;
+    const cx = Math.floor(ballX / cellSize);
+    const cy = Math.floor(ballY / cellSize);
+    if (cy >= 0 && cy < maze.length && cx >= 0 && cx < maze[0].length) {
+        return maze[cy][cx] === "E";
+    } Победа
+    return false;
+}
+
+/* ====== ОТРИСОВКА ====== */
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (!currentLevel) return;
+
+    const maze = currentLevel.maze;
+    for (let y = 0; y < maze.length; y++) {
+        for (let x = 0; x < maze[0].length; x++) {
+            const cell = maze[y][x];
+            const rx = x * cellSize;
+            const ry = y * cellSize;
+
+            if (cell === "1") {
+                // Стены лабиринта в стиле сайта (фиолетовые оттенки)
+                const grad = ctx.createLinearGradient(rx, ry, rx + cellSize, ry + cellSize);
+                grad.addColorStop(0, "#8c5bff");
+                grad.addColorStop(1, "#6b35f2");
+                ctx.fillStyle = grad;
+                ctx.shadowColor = "rgba(107,53,242,0.5)";
+                ctx.shadowBlur = 8;
+                ctx.fillRect(rx, ry, cellSize, cellSize);
+                ctx.shadowBlur = 0;
+            } else if (cell === "S") {
+                // Старт - зеленый
+                ctx.fillStyle = "#4CAF50";
+                ctx.fillRect(rx, ry, cellSize, cellSize);
+            } else if (cell === "E") {
+                // Финиш - желтый/оранжевый
+                const grad = ctx.createRadialGradient(
+                    rx + cellSize/2, ry + cellSize/2, 0,
+                    rx + cellSize/2, ry + cellSize/2, cellSize/2
+                );
+                grad.addColorStop(0, "#ffeb3b");
+                grad.addColorStop(1, "#f9a825");
+                ctx.fillStyle = grad;
+                ctx.fillRect(rx, ry, cellSize, cellSize);
+            } else {
+                // Путь - темно-фиолетовый
+                ctx.fillStyle = "#5730c3";
+                ctx.fillRect(rx, ry, cellSize, cellSize);
+            }
+        }
+    }
+
+    const gradBall = ctx.createRadialGradient(
+        ballX - 3, ballY - 3, 0,
+        ballX, ballY, ballRadius + 2
+    );
+    if (inverted) {
+        gradBall.addColorStop(0, "#ffebee");
+        gradBall.addColorStop(1, "#f44336");
+    } else {
+        gradBall.addColorStop(0, "#ffffff");
+        gradBall.addColorStop(1, "#cfd8dc");
+    }
+
+    ctx.shadowColor = "rgba(0,0,0,0.7)";
+    ctx.shadowBlur = 10;
+    ctx.beginPath();
+    ctx.fillStyle = gradBall;
+    ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    if (inverted) {
+        ctx.strokeStyle = "#ff5252";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(ballX, ballY, ballRadius + 3, 0, Math.PI * 2);
+        ctx.stroke();
+    }
+
+    timeLabel.textContent = `Время: ${elapsedTime.toFixed(1)}с`;
+    movesLabel.textContent = `Ходы: ${movesCount}`;
+
+    if (inverted) {
+        statusText.textContent = "ИНВЕРСИЯ!";
+        statusText.style.color = "#ff5252";
+        const left = (inversionDuration - (performance.now() - inversionStart)) / 1000;
+        statusTime.textContent = `${Math.max(0, left).toFixed(1)}с`;
+    } else {
+        statusText.textContent = "Нормально";
+        statusText.style.color = "#66bb6a";
+        statusTime.textContent = "";
+    }
+}
+
+/* ====== ЦИКЛ ИГРЫ ====== */
+let lastFrameTime = performance.now();
+function loop(now) {
+    const dt = (now - lastFrameTime) / 1000;
+    lastFrameTime = now;
+    update(dt);
+    draw();
+    requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+/* ====== СОБЫТИЯ ====== */
+window.addEventListener("keydown", (e) => {
+    // Предотвращаем прокрутку страницы при нажатии стрелок
+    if (e.key === "ArrowUp" || e.key === "ArrowDown" || e.key === "ArrowLeft" || e.key === "ArrowRight") {
+        e.preventDefault();
+    }
+    if (e.key === "Escape") {
+        showDifficultyPanel();
+        return;
+    }
+    
+    if (e.key === "r" || e.key === "R") {
+        if (gameWon && currentLevelName) {
+            startLevel(currentLevelName);
+        }
+    }
+    if (e.key in keys) {
+        keys[e.key] = true;
+    }
+});
+
+window.addEventListener("keyup", (e) => {
+    if (e.key in keys) {
+        keys[e.key] = false;
+    }
+});
+
+levelButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+        const lvl = btn.getAttribute("data-level");
+        if (!lvl) return;
+        startLevel(lvl);
+    });
+});
+
+// Кнопка рестарт в панели победы
+const restartBtn = document.getElementById("restart-btn");
+if (restartBtn) {
+    restartBtn.addEventListener("click", () => {
+        if (currentLevelName) {
+            startLevel(currentLevelName);
+        }
+    });
+}
+
+const changeLevelBtn = document.getElementById("change-level-btn");
+if (changeLevelBtn) {
+    changeLevelBtn.addEventListener("click", () => {
+        showDifficultyPanel();
+    });
+}
+
+function exitGame() {
+    window.location.href = '../test.html';
+}
+
+showDifficultyPanel();
+</script>
+</body>
+</html>

@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Хали-Гали: Тренировка ингибиторного контроля</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;700&display=swap');
+        body {
+            background: #f6f0ff;
+            font-family: 'Exo 2', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            position: relative;
+        }
+        body::before,
+        body::after{
+            content:'';
+            position:fixed;
+            width:520px;
+            height:520px;
+            border-radius:45% 55% 55% 45%;
+            background:rgba(142,111,255,.18);
+            z-index:-2;
+            filter:blur(0);
+        }
+        body::before{top:-120px;left:-160px;}
+        body::after{bottom:-180px;right:-160px;}
+
+        .container {
+            width: 100%;
+            max-width: 700px;
+            background-color: #ffffff;
+            border-radius: 32px;
+            box-shadow: 0 25px 80px rgba(96,33,201,.15);
+            overflow: hidden;
+            max-height: 95vh;
+            position: relative;
+        }
+
+        .exit-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(120deg, #6630ff, #a353ff);
+            color: #fff;
+            border: none;
+            border-radius: 999px;
+            padding: 10px 26px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 18px 35px rgba(111,55,230,.35);
+            transition: transform 0.25s, box-shadow 0.25s;
+            z-index: 1000;
+        }
+
+        .exit-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 22px 40px rgba(111,55,230,.45);
+        }
+
+        /* Меню */
+        #menu-screen {
+            padding: 25px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #6b35f2;
+            margin-bottom: 8px;
+            font-size: 2.2rem;
+            text-shadow: none;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            color: #6f6892;
+            margin-bottom: 20px;
+            font-size: 1rem;
+        }
+
+        .menu-section {
+            background-color: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .difficulty-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .difficulty-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .easy {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .medium {
+            background-color: #FF9800;
+            color: white;
+        }
+
+        .hard {
+            background-color: #F44336;
+            color: white;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .action-btn {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .start-btn {
+            background: linear-gradient(120deg, #6630ff, #a353ff);
+            color: white;
+            box-shadow: 0 18px 35px rgba(111,55,230,.35);
+        }
+
+        .exit-btn {
+            background: linear-gradient(120deg, #ff4757, #ff6b7a);
+            color: white;
+            border: none;
+            box-shadow: 0 18px 35px rgba(255,71,87,.35);
+        }
+
+.difficulty-btn:hover, .action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.25);
+}
+
+.difficulty-btn:active, .action-btn:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.difficulty-btn.selected {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 2px white, 0 0 0 5px currentColor;
+}
+
+/* Игровой экран */
+#game-screen {
+    display: none;
+    padding: 15px;
+    text-align: center;
+}
+
+.game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 0 50px;
+}
+
+.score-display, .timer-display {
+    background-color: white;
+    padding: 8px 16px;
+    border-radius: 50px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+    font-weight: bold;
+    font-size: 1rem;
+    z-index: 10;
+    position: relative;
+}
+
+        .score-display {
+            color: #6b35f2;
+        }
+
+        .timer-display {
+            color: #8c5bff;
+        }
+
+.cards-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin: 15px 0;
+    padding: 0 8px;
+    min-height: 280px;
+}
+
+/* Размеры карточек для разных уровней сложности */
+.card {
+    background-color: white;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.8rem;
+    cursor: pointer;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+    transition: all 0.2s ease;
+    user-select: none;
+    width: 100%;
+    height: 70px; /* По умолчанию для легкого и среднего уровня */
+}
+
+/* Для сложного уровня - меньшие карточки */
+.card.hard-difficulty {
+    height: 60px;
+    font-size: 1.5rem;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+}
+
+.card:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.card.matched {
+    background-color: #4CAF50;
+    color: white;
+    transform: scale(0.98);
+    cursor: default;
+}
+
+.card.error {
+    background-color: #F44336;
+    color: white;
+    animation: shake 0.5s;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-6px); }
+    40%, 80% { transform: translateX(6px); }
+}
+
+.game-controls {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 15px;
+}
+
+.back-btn {
+    background-color: #757575;
+    color: white;
+}
+
+/* Экран результатов */
+#result-screen {
+    display: none;
+    padding: 25px;
+    text-align: center;
+}
+
+        .result-message {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #6b35f2;
+        }
+
+        .final-score {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: #8c5bff;
+            margin-bottom: 20px;
+        }
+
+.result-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 15px;
+}
+
+.restart-btn {
+    background-color: #4CAF50;
+    color: white;
+}
+
+/* Экран победы */
+#win-screen {
+    display: none;
+    padding: 30px;
+    text-align: center;
+    background: linear-gradient(135deg, rgba(107, 53, 242, 0.1), rgba(140, 91, 255, 0.1));
+    border-radius: 20px;
+    margin: 20px;
+}
+
+.win-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #6b35f2;
+    margin-bottom: 15px;
+    text-shadow: 2px 2px 4px rgba(107, 53, 242, 0.3);
+    animation: winPulse 2s ease-in-out infinite;
+}
+
+@keyframes winPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.win-icon {
+    font-size: 4rem;
+    margin: 20px 0;
+    animation: winBounce 1s ease-in-out infinite;
+}
+
+@keyframes winBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.win-message {
+    font-size: 1.3rem;
+    color: #8c5bff;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.win-score-container {
+    background: linear-gradient(120deg, #6630ff, #a353ff);
+    color: white;
+    padding: 20px;
+    border-radius: 15px;
+    margin: 20px 0;
+    box-shadow: 0 10px 30px rgba(111, 55, 230, 0.3);
+}
+
+.win-score-label {
+    font-size: 1rem;
+    opacity: 0.9;
+    margin-bottom: 8px;
+}
+
+.win-score-value {
+    font-size: 3rem;
+    font-weight: 700;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.win-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 25px;
+    flex-wrap: wrap;
+}
+
+.win-btn {
+    padding: 12px 30px;
+    border: none;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.win-btn-primary {
+    background: linear-gradient(120deg, #6630ff, #a353ff);
+    color: white;
+    box-shadow: 0 8px 20px rgba(111, 55, 230, 0.4);
+}
+
+.win-btn-secondary {
+    background: linear-gradient(120deg, #4CAF50, #66BB6A);
+    color: white;
+    box-shadow: 0 8px 20px rgba(76, 175, 80, 0.4);
+}
+
+.win-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.win-btn:active {
+    transform: translateY(0);
+}
+
+/* Адаптивность для очень маленьких экранов */
+@media (max-width: 600px) {
+    .container {
+        max-height: 98vh;
+        border-radius: 12px;
+    }
+
+    #menu-screen, #result-screen, #win-screen {
+        padding: 20px 15px;
+    }
+
+    h1 {
+        font-size: 1.8rem;
+    }
+
+    .cards-container {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 6px;
+        min-height: 240px;
+    }
+
+    .card {
+        height: 60px;
+        font-size: 1.5rem;
+        border-radius: 8px;
+    }
+
+    .card.hard-difficulty {
+        height: 50px;
+        font-size: 1.3rem;
+    }
+
+    .game-header {
+        padding: 0 40px;
+    }
+
+    .difficulty-buttons, .action-buttons, .result-buttons, .game-controls, .win-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .difficulty-btn, .action-btn {
+        width: 100%;
+        max-width: 200px;
+    }
+
+    .exit-button-top {
+        top: 10px;
+        left: 10px;
+        width: 35px;
+        height: 35px;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .cards-container {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 5px;
+        min-height: 200px;
+    }
+
+    .card {
+        height: 55px;
+        font-size: 1.3rem;
+        border-radius: 6px;
+    }
+
+    .card.hard-difficulty {
+        height: 45px;
+        font-size: 1.1rem;
+    }
+
+    .game-header {
+        flex-direction: column;
+        gap: 8px;
+        padding: 0 35px;
+    }
+}
+
+@media (max-width: 360px) {
+    .cards-container {
+        grid-template-columns: repeat(4, 1fr);
+        min-height: 180px;
+    }
+
+    .card {
+        height: 50px;
+        font-size: 1.2rem;
+    }
+
+    .card.hard-difficulty {
+        height: 40px;
+        font-size: 1rem;
+    }
+
+    .game-header {
+        padding: 0 30px;
+    }
+}
+
+/* Для горизонтальной ориентации на мобильных */
+@media (max-height: 500px) and (orientation: landscape) {
+    .container {
+        max-width: 95%;
+        max-height: 98vh;
+    }
+
+    .cards-container {
+        grid-template-columns: repeat(6, 1fr);
+        gap: 6px;
+        min-height: 120px;
+    }
+
+    .card {
+        height: 45px;
+        font-size: 1.2rem;
+    }
+
+    .card.hard-difficulty {
+        height: 40px;
+        font-size: 1rem;
+    }
+
+    #menu-screen, #result-screen, #win-screen {
+        padding: 15px;
+    }
+
+    h1 {
+        font-size: 1.6rem;
+        margin-bottom: 5px;
+    }
+
+    .win-title {
+        font-size: 2rem;
+    }
+
+    .win-icon {
+        font-size: 3rem;
+    }
+
+    .win-score-value {
+        font-size: 2.5rem;
+    }
+
+    .subtitle {
+        margin-bottom: 10px;
+        font-size: 0.9rem;
+    }
+
+    .menu-section {
+        padding: 12px;
+        margin-bottom: 12px;
+    }
+
+    .game-header {
+        padding: 0 40px;
+    }
+}
+
+/* Для очень высоких экранов */
+@media (min-height: 800px) {
+    .card {
+        height: 75px;
+    }
+
+    .card.hard-difficulty {
+        height: 65px;
+        font-size: 1.7rem;
+    }
+
+    .cards-container {
+        gap: 10px;
+        min-height: 320px;
+    }
+}
+    </style>
+</head>
+<body>
+    <button class="exit-button" onclick="exitGame()" title="Выход на главную">Выход</button>
+    <div class="container">
+
+        <!-- Меню -->
+        <div id="menu-screen">
+            <h1>Хали-Гали</h1>
+            <p class="subtitle">Тренировка ингибиторного контроля</p>
+
+            <div class="menu-section">
+                <h2>Выберите сложность</h2>
+                <div class="difficulty-buttons">
+                    <button class="difficulty-btn easy" data-difficulty="easy">Легкая</button>
+                    <button class="difficulty-btn medium" data-difficulty="medium">Средняя</button>
+                    <button class="difficulty-btn hard" data-difficulty="hard">Сложная</button>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="action-btn start-btn" id="start-btn">Начать игру</button>
+            </div>
+        </div>
+
+        <!-- Игровой экран -->
+        <div id="game-screen">
+            <div class="game-header">
+                <div class="score-display">Очки: <span id="score">0</span></div>
+                <div class="timer-display">Время: <span id="timer">60</span>с</div>
+            </div>
+
+            <div class="cards-container" id="cards-container">
+                <!-- Карточки будут добавлены через JavaScript -->
+            </div>
+
+            <div class="game-controls">
+                <button class="action-btn back-btn" id="back-btn">В меню</button>
+            </div>
+        </div>
+
+        <!-- Экран результатов -->
+        <div id="result-screen">
+            <h2>Игра завершена!</h2>
+            <div class="result-message" id="result-message"></div>
+            <div class="final-score" id="final-score">0</div>
+
+            <div class="result-buttons">
+                <button class="action-btn restart-btn" id="restart-btn">Играть снова</button>
+                <button class="action-btn back-btn" id="back-to-menu-btn">В меню</button>
+            </div>
+        </div>
+
+        <!-- Экран победы -->
+        <div id="win-screen">
+            <div class="win-title">🎉 Поздравляем! 🎉</div>
+            <div class="win-icon">🏆</div>
+            <div class="win-message" id="win-message">Вы нашли все пары!</div>
+            <div class="win-score-container">
+                <div class="win-score-label">Ваш результат</div>
+                <div class="win-score-value" id="win-score">0</div>
+            </div>
+            <div class="win-buttons">
+                <button class="win-btn win-btn-secondary" id="win-restart-btn">Играть снова</button>
+                <button class="win-btn win-btn-primary" id="win-menu-btn">В меню</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Элементы DOM
+        const menuScreen = document.getElementById('menu-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const winScreen = document.getElementById('win-screen');
+
+        const startBtn = document.getElementById('start-btn');
+        const backBtn = document.getElementById('back-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const backToMenuBtn = document.getElementById('back-to-menu-btn');
+        const winRestartBtn = document.getElementById('win-restart-btn');
+        const winMenuBtn = document.getElementById('win-menu-btn');
+
+        const scoreDisplay = document.getElementById('score');
+        const timerDisplay = document.getElementById('timer');
+        const cardsContainer = document.getElementById('cards-container');
+        const resultMessage = document.getElementById('result-message');
+        const finalScore = document.getElementById('final-score');
+        const winMessage = document.getElementById('win-message');
+        const winScore = document.getElementById('win-score');
+
+        const difficultyButtons = document.querySelectorAll('.difficulty-btn');
+
+        // Переменные игры
+        let selectedDifficulty = 'medium';
+        let score = 0;
+        let timeLeft = 60;
+        let timerInterval;
+        let cards = [];
+        let firstCard = null;
+        let secondCard = null;
+        let lockBoard = false;
+
+        // Символы для карточек
+        const symbols = ['🍎', '🍌', '🍒', '🍇', '🍊', '🍓', '🍉', '🍑'];
+
+        // Обработчики событий для кнопок сложности
+        difficultyButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                difficultyButtons.forEach(btn => btn.classList.remove('selected'));
+                button.classList.add('selected');
+                selectedDifficulty = button.getAttribute('data-difficulty');
+            });
+        });
+
+        // По умолчанию выбираем среднюю сложность
+        document.querySelector('.difficulty-btn.medium').classList.add('selected');
+
+        // Обработчики событий для навигации
+        startBtn.addEventListener('click', startGame);
+        backBtn.addEventListener('click', showMenu);
+        restartBtn.addEventListener('click', startGame);
+        backToMenuBtn.addEventListener('click', showMenu);
+        winRestartBtn.addEventListener('click', startGame);
+        winMenuBtn.addEventListener('click', showMenu);
+
+        // Функция выхода из игры - перенаправляет на test.html
+        function exitGame() {
+            if (confirm('Вы уверены, что хотите выйти из игры?')) {
+                window.location.href = '../test.html';
+            }
+        }
+
+        // Функции игры
+        function startGame() {
+            // Сброс переменных
+            score = 0;
+            scoreDisplay.textContent = score;
+
+            // Установка времени в зависимости от сложности
+            switch(selectedDifficulty) {
+                case 'easy':
+                    timeLeft = 90;
+                    break;
+                case 'medium':
+                    timeLeft = 60;
+                    break;
+                case 'hard':
+                    timeLeft = 100;
+                    break;
+            }
+
+            timerDisplay.textContent = timeLeft;
+
+            // Показать игровой экран
+            menuScreen.style.display = 'none';
+            resultScreen.style.display = 'none';
+            winScreen.style.display = 'none';
+            gameScreen.style.display = 'block';
+
+            // Создать карточки
+            createCards();
+
+            // Запустить таймер
+            startTimer();
+        }
+
+        function createCards() {
+            cardsContainer.innerHTML = '';
+            cards = [];
+
+            // Определяем количество пар в зависимости от сложности
+            let pairsCount;
+            switch(selectedDifficulty) {
+                case 'easy':
+                    pairsCount = 8;
+                    break;
+                case 'medium':
+                    pairsCount = 12;
+                    break;
+                case 'hard':
+                    pairsCount = 16;
+                    break;
+            }
+
+            // Создаем пары символов
+            const gameSymbols = [];
+            for (let i = 0; i < pairsCount; i++) {
+                const symbol = symbols[i % symbols.length];
+                gameSymbols.push(symbol, symbol);
+            }
+
+            // Перемешиваем символы
+            shuffleArray(gameSymbols);
+
+            // Создаем карточки
+            gameSymbols.forEach((symbol, index) => {
+                const card = document.createElement('div');
+                card.className = 'card';
+
+                // Добавляем класс для сложного уровня
+                if (selectedDifficulty === 'hard') {
+                    card.classList.add('hard-difficulty');
+                }
+
+                card.dataset.symbol = symbol;
+                card.dataset.index = index;
+                card.textContent = '?';
+
+                card.addEventListener('click', flipCard);
+
+                cardsContainer.appendChild(card);
+                cards.push(card);
+            });
+        }
+
+        function flipCard() {
+            if (lockBoard) return;
+            if (this === firstCard) return;
+            if (this.classList.contains('matched')) return;
+
+            this.textContent = this.dataset.symbol;
+
+            if (!firstCard) {
+                // Первая карточка
+                firstCard = this;
+                return;
+            }
+
+            // Вторая карточка
+            secondCard = this;
+            lockBoard = true;
+
+            checkForMatch();
+        }
+
+        function checkForMatch() {
+            const isMatch = firstCard.dataset.symbol === secondCard.dataset.symbol;
+
+            if (isMatch) {
+                disableCards();
+                updateScore(10);
+            } else {
+                unflipCards();
+                updateScore(-2);
+            }
+        }
+
+        function disableCards() {
+            firstCard.classList.add('matched');
+            secondCard.classList.add('matched');
+
+            resetBoard();
+            
+            // Проверяем, все ли карточки совпали
+            const allMatched = cards.every(card => card.classList.contains('matched'));
+            if (allMatched) {
+                // Игрок выиграл до истечения времени
+                endGame();
+            }
+        }
+
+        function unflipCards() {
+            setTimeout(() => {
+                firstCard.textContent = '?';
+                secondCard.textContent = '?';
+                firstCard.classList.add('error');
+                secondCard.classList.add('error');
+
+                setTimeout(() => {
+                    firstCard.classList.remove('error');
+                    secondCard.classList.remove('error');
+                    resetBoard();
+                }, 500);
+            }, 1000);
+        }
+
+        function resetBoard() {
+            [firstCard, secondCard] = [null, null];
+            lockBoard = false;
+        }
+
+        function updateScore(points) {
+            score += points;
+            if (score < 0) score = 0;
+            scoreDisplay.textContent = score;
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerDisplay.textContent = timeLeft;
+
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        function endGame() {
+            clearInterval(timerInterval);
+
+            // Проверяем, все ли карточки совпали
+            const allMatched = cards.every(card => card.classList.contains('matched'));
+
+            // Определяем сообщение
+            if (allMatched) {
+                let bonus = 0;
+                let winText = '';
+                switch(selectedDifficulty) {
+                    case 'easy':
+                        bonus = 20;
+                        winText = 'Отличная работа на легком уровне!';
+                        break;
+                    case 'medium':
+                        bonus = 40;
+                        winText = 'Превосходно! Средний уровень пройден!';
+                        break;
+                    case 'hard':
+                        bonus = 60;
+                        winText = 'Невероятно! Вы справились со сложным уровнем!';
+                        break;
+                }
+                score += bonus;
+                
+                // Показываем экран победы
+                winMessage.textContent = winText;
+                winScore.textContent = score;
+                gameScreen.style.display = 'none';
+                resultScreen.style.display = 'none';
+                winScreen.style.display = 'block';
+            } else {
+                resultMessage.textContent = 'Время вышло! Попробуйте еще раз.';
+                finalScore.textContent = score;
+                // Показываем экран результатов
+                gameScreen.style.display = 'none';
+                resultScreen.style.display = 'block';
+                winScreen.style.display = 'none';
+            }
+        }
+
+        function showMenu() {
+            clearInterval(timerInterval);
+            gameScreen.style.display = 'none';
+            resultScreen.style.display = 'none';
+            winScreen.style.display = 'none';
+            menuScreen.style.display = 'block';
+        }
+
+        // Вспомогательные функции
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+    </script>
+</body>
+</html>

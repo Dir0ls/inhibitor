@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<title>Игра с настройками</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;700&display=swap');
+  body {
+    background-color: #f6f0ff;
+    font-family: 'Exo 2', sans-serif;
+    color: #1b1130;
+    text-align: center;
+    margin: 20px;
+    min-height: 100vh;
+    position: relative;
+  }
+  body::before,
+  body::after{
+    content:'';
+    position:fixed;
+    width:520px;
+    height:520px;
+    border-radius:45% 55% 55% 45%;
+    background:rgba(142,111,255,.18);
+    z-index:-2;
+    filter:blur(0);
+  }
+  body::before{top:-120px;left:-160px;}
+  body::after{bottom:-180px;right:-160px;}
+
+  /* Меню */
+  #menu {
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 28px 32px;
+    max-width: 260px;
+    margin: 30px auto;
+    box-shadow: 0 25px 80px rgba(96,33,201,.15);
+    color: #1b1130;
+    text-align: center;
+  }
+
+  #menu h1 {
+    margin-bottom: 20px;
+    font-weight: 700;
+  }
+
+  .menu-button {
+    background: linear-gradient(120deg, #6630ff, #a353ff);
+    border: none;
+    color: white;
+    font-size: 18px;
+    padding: 14px 32px;
+    margin: 8px 0;
+    border-radius: 999px;
+    width: 100%;
+    cursor: pointer;
+    transition: transform 0.25s, box-shadow 0.25s;
+    font-weight: 600;
+    box-shadow: 0 18px 35px rgba(111,55,230,.35);
+  }
+
+  .menu-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 40px rgba(111,55,230,.45);
+  }
+
+  .exit-button {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 10px 26px;
+    border-radius: 999px;
+    border: none;
+    background: linear-gradient(120deg, #6630ff, #a353ff);
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 18px 35px rgba(111,55,230,.35);
+    transition: transform 0.25s, box-shadow 0.25s;
+    z-index: 1000;
+  }
+
+  .exit-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 22px 40px rgba(111,55,230,.45);
+  }
+
+  /* Настройки */
+  #settings {
+    display: none;
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 28px 32px;
+    max-width: 300px;
+    margin: 20px auto;
+    box-shadow: 0 25px 80px rgba(96,33,201,.15);
+    color: #1b1130;
+    text-align: left;
+  }
+
+  #settings label {
+    display: block;
+    margin: 10px 0 5px 0;
+  }
+
+  #settings input, #settings select {
+    width: 100%;
+    padding: 6px;
+    font-size: 16px;
+    border-radius: 6px;
+    border: 1px solid #b19cd9;
+    box-sizing: border-box;
+  }
+
+  #gamediv, #info {
+    display: none;
+  }
+
+  #gamediv {
+    display: grid;
+    gap: 5px;
+    width: max-content;
+    margin: 20px auto;
+    background-color: #ffffff;
+    padding: 18px;
+    border-radius: 24px;
+    box-shadow: 0 25px 80px rgba(96,33,201,.15);
+  }
+
+  .square {
+    cursor: pointer;
+    user-select: none;
+    background-color: #dcd0ff; /* светло-фиолетовый базовый фон */
+    border-radius: 8px;
+    transition: background-color 0.3s, box-shadow 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .square:hover {
+    background-color: #c9b3ff; /* при наведении светлее */
+    box-shadow: 0 0 8px #9f7de7;
+  }
+
+  .green {
+    background-color: #7a52ff; /* насыщенный фиолетовый для зеленых */
+    box-shadow: 0 0 10px #7a52ff;
+  }
+
+  .red {
+    background-color: #d77aff; /* контрастный пурпурный для красных */
+    box-shadow: 0 0 10px #d77aff;
+  }
+
+  #info {
+    font-size: 18px;
+    margin-top: 10px;
+    color: #4b0082;
+  }
+
+  #info span {
+    margin: 0 10px;
+  }
+</style>
+</head>
+<body>
+
+<button class="exit-button" onclick="exitGame()">Выход</button>
+<!-- Главное меню -->
+<div id="menu">
+  <h1>Моя Игра</h1>
+  <button class="menu-button" id="startBtn">Начать игру</button>
+  <button class="menu-button" id="settingsBtn">Настройки</button>
+</div>
+
+<!-- Настройки -->
+<div id="settings">
+  <h2>Настройки игры</h2>
+  <label>Размер квадрата (px):
+    <input type="number" id="squareSize" value="60" min="10" max="200" />
+  </label>
+  <label>Форма:
+    <select id="squareShape">
+      <option value="square">Квадрат</option>
+      <option value="circle">Круг</option>
+    </select>
+  </label>
+  <label>Количество по горизонтали:
+    <input type="number" id="cols" value="4" min="1" max="10" />
+  </label>
+  <label>Количество по вертикали:
+    <input type="number" id="rows" value="4" min="1" max="10" />
+  </label>
+  <label>Частота синих (%):
+    <input type="range" id="greenFrequency" value="50" min="0" max="100" />
+    <span id="greenFreqValue">50%</span>
+  </label>
+  <button class="menu-button" id="applySettingsBtn">Применить</button>
+  <button class="menu-button" id="backBtn">Назад</button>
+</div>
+
+<!-- Игровое поле и информация -->
+<h2 style="text-align:center;">Кликайте по синим квадратам, игнорируйте фиолетовые</h2>
+<div id="gamediv"></div>
+<div id="info">
+  Очки: <span id="score">0</span> |
+  Уровень: <span id="level">1</span> |
+  Время: <span id= "timer">30</span> сек
+</div>
+
+<script>
+  const menu = document.getElementById('menu');
+  const settingsDiv = document.getElementById('settings');
+  const startBtn = document.getElementById('startBtn');
+  const settingsBtn = document.getElementById('settingsBtn');
+  const applySettingsBtn = document.getElementById('applySettingsBtn');
+  const backBtn = document.getElementById('backBtn');
+  const game = document.getElementById('gamediv');
+  const info = document.getElementById('info');
+  const scoreDisplay = document.getElementById('score');
+  const levelDisplay = document.getElementById('level');
+  const timerDisplay = document.getElementById('timer');
+
+  let score = 0;
+  let level = 1;
+  let timeLeft;
+  let timerInterval;
+
+  const maxLevel = 3;
+  const levelTimes = [30, 20, 10];
+
+  // Настройки по умолчанию
+  let squareSize = 60;
+  let squareShape = 'square';
+  let cols = 4;
+  let rows = 4;
+  let greenFrequency = 0.5;
+
+  // Отображение текущего значения для частоты
+  const greenFreqInput = document.getElementById('greenFrequency');
+  const greenFreqValue = document.getElementById('greenFreqValue');
+  greenFreqInput.oninput = () => {
+    greenFreqValue.textContent = greenFreqInput.value + '%';
+  };
+
+  // Переходы по меню
+  settingsBtn.onclick = () => {
+    menu.style.display = 'none';
+    settingsDiv.style.display = 'block';
+    // Загрузка текущих настроек в форму
+    document.getElementById('squareSize').value = squareSize;
+    document.getElementById('squareShape').value = squareShape;
+    document.getElementById('cols').value = cols;
+    document.getElementById('rows').value = rows;
+    greenFreqInput.value = greenFrequency * 100;
+    greenFreqValue.textContent = (greenFrequency * 100) + '%';
+  };
+
+  backBtn.onclick = () => {
+    settingsDiv.style.display = 'none';
+    menu.style.display = 'block';
+  };
+
+  function exitGame() {
+    window.location.href = '../test.html';
+  }
+
+  applySettingsBtn.onclick = () => {
+    squareSize = Math.min(Math.max(parseInt(document.getElementById('squareSize').value), 10), 200);
+    squareShape = document.getElementById('squareShape').value;
+    cols = Math.min(Math.max(parseInt(document.getElementById('cols').value), 1), 10);
+    rows = Math.min(Math.max(parseInt(document.getElementById('rows').value), 1), 10);
+    greenFrequency = Math.min(Math.max(parseInt(greenFreqInput.value) / 100, 0), 1);
+    settingsDiv.style.display = 'none';
+    menu.style.display = 'block';
+  };
+
+  function createSquares() {
+    game.innerHTML = '';
+    game.style.gridTemplateColumns = `repeat(${cols}, ${squareSize}px)`;
+    game.style.gridTemplateRows = `repeat(${rows}, ${squareSize}px)`;
+    for (let i = 0; i < rows * cols; i++) {
+      const square = document.createElement('div');
+      square.classList.add('square');
+      square.style.width = squareSize + 'px';
+      square.style.height = squareSize + 'px';
+      square.style.borderRadius = squareShape === 'circle' ? '50%' : '8px';
+      if (Math.random() < greenFrequency) {
+        square.classList.add('green');
+        square.addEventListener('click', onGreenClick);
+      } else {
+        square.classList.add('red');
+        square.addEventListener('click', onRedClick);
+      }
+      game.appendChild(square);
+    }
+  }
+
+  function onGreenClick() {
+    score++;
+    scoreDisplay.textContent = score;
+    checkLevelComplete();
+    shuffleSquares();
+  }
+
+  function onRedClick() {
+    alert('Ошибка! Уровень сброшен');
+    resetLevel();
+    showMenu();
+  }
+
+  function shuffleSquares() {
+    createSquares();
+  }
+
+  function startTimer() {
+    timeLeft = levelTimes[level - 1];
+    timerDisplay.textContent = timeLeft;
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      timerDisplay.textContent = timeLeft;
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        alert('Время вышло! Уровеньсброшен');
+        resetLevel();
+        showMenu();
+      }
+    }, 1000);
+  }
+
+  function resetLevel() {
+    clearInterval(timerInterval);
+    score = 0;
+    level = 1;
+    scoreDisplay.textContent = score;
+    levelDisplay.textContent = level;
+  }
+
+  function checkLevelComplete() {
+    if (score >= 10) {
+      clearInterval(timerInterval);
+      if (level < maxLevel) {
+        level++;
+        levelDisplay.textContent = level;
+        score = 0;
+        scoreDisplay.textContent = score;
+        alert('Поздравляем! Следующий уровень');
+        startGame();
+      } else {
+        alert('Вы прошли все уровни!');
+        resetLevel();
+        showMenu();
+      }
+    }
+  }
+
+  function startGame() {
+    createSquares();
+    startTimer();
+  }
+
+  function showMenu() {
+    menu.style.display = 'block';
+    game.style.display = 'none';
+    info.style.display = 'none';
+  }
+
+  startBtn.onclick = () => {
+    menu.style.display = 'none';
+    game.style.display = 'grid';
+    info.style.display = 'block';
+    resetLevel();
+    startGame();
+  };
+
+  // В начало показываем меню
+  showMenu();
+</script>
+</body>
+</html>
